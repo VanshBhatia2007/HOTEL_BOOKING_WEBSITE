@@ -1,6 +1,11 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+const path = require("path");
+
+app.set("view engine","ejs");
+app.set("views",path.join(__dirname,"views"));
+app.use(express.urlencoded({extended:true}));
 
 const Listing = require("./models/listing.js");
 
@@ -25,9 +30,14 @@ app.get("/",(req,res)=>{
 
 app.get("/listings",async (req,res)=>{
     const listings = await Listing.find({});
-    res.render("index.ejs",{listings})
+    res.render("listings/index.ejs",{listings})
 });
 
+app.get("/listings/:id",async (req,res)=>{
+    let {id} = req.params;
+    const listing = await Listing.findById(id);
+    res.render("listings/show.ejs",{listing});
+});
 
 app.listen(3000,()=>{
     console.log("server is listening to port 3000");
