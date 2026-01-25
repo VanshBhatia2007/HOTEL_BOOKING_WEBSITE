@@ -1,7 +1,13 @@
 body{
     background-color: pink;
-    font-family: "Figtree", sans-serif;
+    font-family: "Figtree", sans-serif !important;
     font-optical-sizing: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.container{
+    flex: 1;
 }
 
 .navbar{
@@ -28,7 +34,7 @@ body{
 
 }
 
-.f-info-links ,.f-info-socials,f-info-brand{
+.f-info-links ,.f-info-socials,.f-info-brand{
     width: 100%;
     display: flex;
     align-items: center;
@@ -82,4 +88,13 @@ body{
 .card-img-overlay:hover{
     opacity: 0.2;
     background-color: white;
+}
+.add-btn{
+    background-color: red !important;
+    border: none;
+}
+
+.edit-btn{
+    background-color: red !important;
+    border: none;
 }
