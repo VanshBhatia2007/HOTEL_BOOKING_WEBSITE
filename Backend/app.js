@@ -10,9 +10,12 @@ app.set("views",path.join(__dirname,"views"));
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname,"/public")));
-const wrapasync=require("./utils/wrapasync.js")
-
+const wrapasync=require("./utils/wrapasync.js");
+const ExpressError=require("./utils/expresserror.js");
+const Joi = require('joi');
 const Listing = require("./models/listing.js");
+const {listingschema} = require("./schema.js");
+const console = require("console");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/hotel_booking";
 
@@ -33,16 +36,28 @@ app.get("/",(req,res)=>{
     res.send("hiiiiii");
 });
 
-app.get("/listings",async (req,res)=>{
+const validatelisting=(req,res,next)=>{
+    let {error} = listingschema.validate(req.body);
+    console.log(result);
+    if(error){
+        let ermsg = error.details.map((el)=>el.message).join(",");
+        throw ExpressError(400,errmsg);
+    }else{
+        next(error);
+    }   
+};
+
+app.get("/listings", wrapasync( async (req,res)=>{
     const listings = await Listing.find({});
     res.render("listings/index.ejs",{listings})
-});
+})
+);
 //new route
 app.get("/listings/new",(req,res)=>{
     res.render("listings/new.ejs");
 });
 
-app.post("/listings", wrapasync( async (req,res)=>{
+app.post("/listings",validatelisting, wrapasync( async (req,res)=>{
     const listing=new Listing(req.body.listing);
     await listing.save();
     console.log(listing);
@@ -51,33 +66,47 @@ app.post("/listings", wrapasync( async (req,res)=>{
 );
 
 //specific route
-app.get("/listings/:id",async (req,res)=>{
+app.get("/listings/:id",wrapasync( async (req,res)=>{
     let {id} = req.params;
     const listing = await Listing.findById(id);
     res.render("listings/show.ejs",{listing});
-});
+})
+);
 //edit route
-app.get("/listings/:id/edit",async (req,res)=>{
+app.get("/listings/:id/edit",wrapasync(async (req,res)=>{
     let {id} = req.params;
     const listing = await Listing.findById(id);
     res.render("listings/edit.ejs",{listing});
-});
+})
+);
 //update route
-app.put("/listings/:id",async (req,res)=>{
+app.put("/listings/:id",validatelisting,wrapasync(async (req,res)=>{
+    let result = listingschema.validate(req.body);
+    console.log(result);
+    if(result.err){
+        throw ExpressError(400,result.error);
+    }
     let {id} = req.params;
     await Listing.findByIdAndUpdate(id,{...req.body.listing});
     console.log(req.body.listing);
     res.redirect("/listings");
-});
+})
+);
 //Delte route
-app.delete("/listings/:id",async(req,res)=>{
+app.delete("/listings/:id",wrapasync(async(req,res)=>{
     let {id} = req.params;
     let deletedlisting = await Listing.findByIdAndDelete(id);
     res.redirect("/listings");
-});
+})
+);
 
+app.all(/(.*)/,(req,res,next)=>{
+    next(new ExpressError(505,"page not found"));
+});
 app.use((err,req,res,next)=>{
-    res.send("something went wrong")
+    let{statuscode=500,message="something went wrong"}=err;
+    res.status(statuscode).render("error.ejs",{message});
+    // res.status(statuscode).send(message);
 });
 app.listen(3000,()=>{
     console.log("server is listening to port 3000");
