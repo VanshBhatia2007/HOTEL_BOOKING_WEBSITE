@@ -10,6 +10,7 @@ app.set("views",path.join(__dirname,"views"));
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname,"/public")));
+const wrapasync=require("./utils/wrapasync.js")
 
 const Listing = require("./models/listing.js");
 
@@ -41,12 +42,13 @@ app.get("/listings/new",(req,res)=>{
     res.render("listings/new.ejs");
 });
 
-app.post("/listings",async (req,res)=>{
+app.post("/listings", wrapasync( async (req,res)=>{
     const listing=new Listing(req.body.listing);
     await listing.save();
     console.log(listing);
     res.redirect("/listings");
-});
+})
+);
 
 //specific route
 app.get("/listings/:id",async (req,res)=>{
@@ -72,6 +74,10 @@ app.delete("/listings/:id",async(req,res)=>{
     let {id} = req.params;
     let deletedlisting = await Listing.findByIdAndDelete(id);
     res.redirect("/listings");
+});
+
+app.use((err,req,res,next)=>{
+    res.send("something went wrong")
 });
 app.listen(3000,()=>{
     console.log("server is listening to port 3000");
