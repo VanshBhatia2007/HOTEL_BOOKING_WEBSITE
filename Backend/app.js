@@ -14,7 +14,8 @@ const wrapasync=require("./utils/wrapasync.js");
 const ExpressError=require("./utils/expresserror.js");
 const Joi = require('joi');
 const Listing = require("./models/listing.js");
-const {listingschema} = require("./schema.js");
+const {listingschema , reviewschema} = require("./schema.js");
+const Review = require("./models/review.js");
 const console = require("console");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/hotel_booking";
@@ -38,10 +39,21 @@ app.get("/",(req,res)=>{
 
 const validatelisting=(req,res,next)=>{
     let {error} = listingschema.validate(req.body);
-    console.log(result);
+    console.log(error);
     if(error){
-        let ermsg = error.details.map((el)=>el.message).join(",");
+        let errmsg = error.details.map((el)=>el.message).join(",");
         throw ExpressError(400,errmsg);
+    }else{
+        next(error);
+    }   
+};
+
+const validatereview=(req,res,next)=>{
+    let {error} = reviewschema.validate(req.body);
+    console.log(error);
+    if(error){
+        let errmsg = error.details.map((el)=>el.message).join(",");
+        throw new ExpressError(400,errmsg);
     }else{
         next(error);
     }   
@@ -68,7 +80,7 @@ app.post("/listings",validatelisting, wrapasync( async (req,res)=>{
 //specific route
 app.get("/listings/:id",wrapasync( async (req,res)=>{
     let {id} = req.params;
-    const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id).populate("reviews");
     res.render("listings/show.ejs",{listing});
 })
 );
@@ -90,6 +102,16 @@ app.put("/listings/:id",validatelisting,wrapasync(async (req,res)=>{
     await Listing.findByIdAndUpdate(id,{...req.body.listing});
     console.log(req.body.listing);
     res.redirect("/listings");
+})
+);
+//review route
+app.post("/listings/:id/reviews",validatereview,wrapasync(async(req,res)=>{
+    let listing = await Listing.findById(req.params.id);
+    let newreview = new Review(req.body.review);
+    listing.reviews.push(newreview);
+    await newreview.save();
+    await listing.save();
+    res.redirect(`/listings/${listing.id}`);
 })
 );
 //Delte route
