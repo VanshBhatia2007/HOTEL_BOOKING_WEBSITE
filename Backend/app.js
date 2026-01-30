@@ -42,9 +42,9 @@ const validatelisting=(req,res,next)=>{
     console.log(error);
     if(error){
         let errmsg = error.details.map((el)=>el.message).join(",");
-        throw ExpressError(400,errmsg);
+        throw new ExpressError(400,errmsg);
     }else{
-        next(error);
+        next();
     }   
 };
 
@@ -55,7 +55,7 @@ const validatereview=(req,res,next)=>{
         let errmsg = error.details.map((el)=>el.message).join(",");
         throw new ExpressError(400,errmsg);
     }else{
-        next(error);
+        next();
     }   
 };
 
@@ -114,6 +114,14 @@ app.post("/listings/:id/reviews",validatereview,wrapasync(async(req,res)=>{
     res.redirect(`/listings/${listing.id}`);
 })
 );
+//Delete review route
+app.delete("/listings/:id/reviews/:reviewid",wrapasync(async(req,res)=>{
+    let {id , reviewid} = req.params;
+    await Listing.findByIdAndUpdate(id,{$pull:{reviews: reviewid}});
+    await Review.findByIdAndDelete(reviewid);
+    res.redirect(`/listings/${id}`);
+})
+);
 //Delte route
 app.delete("/listings/:id",wrapasync(async(req,res)=>{
     let {id} = req.params;
@@ -123,10 +131,10 @@ app.delete("/listings/:id",wrapasync(async(req,res)=>{
 );
 
 app.all(/(.*)/,(req,res,next)=>{
-    next(new ExpressError(505,"page not found"));
+    next(new ExpressError(404,"page not found"));
 });
 app.use((err,req,res,next)=>{
-    let{statuscode=500,message="something went wrong"}=err;
+    let { statusCode: statuscode = 500, message = "something went wrong" } = err;
     res.status(statuscode).render("error.ejs",{message});
     // res.status(statuscode).send(message);
 });
