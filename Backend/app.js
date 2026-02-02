@@ -21,6 +21,9 @@ const MONGO_URL = "mongodb://127.0.0.1:27017/hotel_booking";
 const reviews = require("./routes/reviews.js");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const Localstratergy = require("passport-local");
+const User = require("./models/user.js");
 async function main() {
     await mongoose.connect(MONGO_URL);
 }
@@ -42,6 +45,13 @@ app.get("/",(req,res)=>{
 
 app.use(session(sessionoptions));
 app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new Localstratergy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 main()
     .then(()=>{
