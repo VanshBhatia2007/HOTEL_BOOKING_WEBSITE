@@ -17,6 +17,7 @@ const Listing = require("./models/listing.js");
 const {listingschema , reviewschema} = require("./schema.js");
 const Review = require("./models/review.js");
 const listings = require("./routes/listing.js");
+const userRoute = require("./routes/user.js")
 const MONGO_URL = "mongodb://127.0.0.1:27017/hotel_booking";
 const reviews = require("./routes/reviews.js");
 const session = require("express-session");
@@ -24,6 +25,7 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const Localstratergy = require("passport-local");
 const User = require("./models/user.js");
+app.use(express.json());
 async function main() {
     await mongoose.connect(MONGO_URL);
 }
@@ -83,6 +85,7 @@ app.use((req,res,next)=>{
 
 app.use("/listings",listings);
 app.use("/listings/:id/reviews",reviews);
+app.use("/",userRoute);
 
 
 app.all(/(.*)/,(req,res,next)=>{
