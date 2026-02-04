@@ -5,7 +5,7 @@ const {listingschema , reviewschema} = require("../schema.js");
 const ExpressError=require("../utils/expresserror.js");
 const wrapasync=require("../utils/wrapasync.js");
 const mongoose = require("mongoose");
-
+const {isLoggedIn} = require("../middleware.js")
 
 
 
@@ -27,11 +27,11 @@ router.get("/", wrapasync( async (req,res)=>{
 })
 );
 //new route
-router.get("/new",(req,res)=>{
+router.get("/new",isLoggedIn,(req,res)=>{
     res.render("listings/new.ejs");
 });
 
-router.post("/",validatelisting, wrapasync( async (req,res)=>{
+router.post("/",isLoggedIn,validatelisting, wrapasync( async (req,res)=>{
     const listing=new Listing(req.body.listing);
     await listing.save();
     console.log(listing);
@@ -52,7 +52,7 @@ router.get("/:id",wrapasync( async (req,res)=>{
 })
 );
 //edit route
-router.get("/:id/edit",wrapasync(async (req,res)=>{
+router.get("/:id/edit",isLoggedIn,wrapasync(async (req,res)=>{
     let {id} = req.params;
     const listing = await Listing.findById(id);
     if(!listing){
@@ -63,7 +63,7 @@ router.get("/:id/edit",wrapasync(async (req,res)=>{
 })
 );
 //update route
-router.put("/:id",validatelisting,wrapasync(async (req,res)=>{
+router.put("/:id",isLoggedIn,validatelisting,wrapasync(async (req,res)=>{
     let result = listingschema.validate(req.body);
     console.log(result);
     if(result.error){
@@ -78,7 +78,7 @@ router.put("/:id",validatelisting,wrapasync(async (req,res)=>{
 );
 
 //Delte route
-router.delete("/:id",wrapasync(async(req,res)=>{
+router.delete("/:id",isLoggedIn,wrapasync(async(req,res)=>{
     let {id} = req.params;
     let deletedlisting = await Listing.findByIdAndDelete(id);
     req.flash("success","Deleted successfully");

@@ -4,18 +4,18 @@
         <h1 class="col-6 offset-3">Signup</h1>
         <form action="/signup" method="post" class="needs-validation" novalidate>
             <div class="mb-3">
-                <label class="form-label" for="Username" >Username: </label>
-                <input type="text" id="Username" name="Username" placeholder="enter Username" class="form-control" required>
+                <label class="form-label" for="username" >Username: </label>
+                <input type="text" id="Username" name="username" placeholder="enter Username" class="form-control" required>
                 <div class="valid-feedback">Username looks good</div>
             </div>
                 <div class="mb-3">
-                    <label class="form-label" for="Email">Email: </label>
-                    <input name="Email" id="Email" placeholder="enter Email" class="form-control" required></input>
+                    <label class="form-label" for="email">Email: </label>
+                    <input type="email" name="email" id="email" placeholder="enter email" class="form-control" required></input>
                 <div class="invalid-feedback">enter the valid Email</div>
             </div>
             <div class="mb-3">
-                <label class="form-label" for="Password">Password: </label>
-                <input name="Password" id="Password" placeholder="enter Password" class="form-control" required></input>
+                <label class="form-label" for="password">Password: </label>
+                <input type="password" name="password" id="password" placeholder="enter Password" class="form-control" required></input>
                 <div class="valid-feedback">Password looks strong</div>
             </div>
             <button class="btn btn-success add-btn">Signup</button>
