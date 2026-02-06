@@ -33,6 +33,7 @@ router.get("/new",isLoggedIn,(req,res)=>{
 
 router.post("/",isLoggedIn,validatelisting, wrapasync( async (req,res)=>{
     const listing=new Listing(req.body.listing);
+    listing.owner = req.user._id;
     await listing.save();
     console.log(listing);
     req.flash("success","new listing added");
@@ -43,11 +44,12 @@ router.post("/",isLoggedIn,validatelisting, wrapasync( async (req,res)=>{
 //specific route
 router.get("/:id",wrapasync( async (req,res)=>{
     let {id} = req.params;
-    const listing = await Listing.findById(id).populate("reviews");
+    const listing = await Listing.findById(id).populate("reviews").populate("owner");
     if(!listing){
         req.flash("error","the listing you are trying to access , does not exist");
         return res.redirect("/listings");
     }
+    console.log(listing);
     res.render("listings/show.ejs",{listing});
 })
 );
