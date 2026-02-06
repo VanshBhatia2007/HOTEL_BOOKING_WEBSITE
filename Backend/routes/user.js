@@ -17,8 +17,14 @@ router.post("/signup", wrapasync(async(req,res)=>{
         const newuser = new User({email,username});
         const registereduser = await User.register(newuser,password);
         console.log(registereduser);
-        req.flash("success","Welcome to Airbnb");
-        res.redirect("/listings");  
+        req.login(registereduser,(err)=>{
+            if(err){
+                return next(err);
+            }
+            req.flash("success","Welcome to Airbnb");
+            res.redirect("/listings");
+        });
+          
     }catch(e){
         req.flash("error",e.message);
         res.redirect("/signup")
