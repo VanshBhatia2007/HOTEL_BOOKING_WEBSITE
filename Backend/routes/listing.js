@@ -1,24 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const Listing = require("../models/listing.js");
-const {listingschema , reviewschema} = require("../schema.js");
 const ExpressError=require("../utils/expresserror.js");
 const wrapasync=require("../utils/wrapasync.js");
+const Listing = require("../models/listing.js");
 const mongoose = require("mongoose");
-const {isLoggedIn} = require("../middleware.js")
+// const {isLoggedIn, isOwner} = require("../middleware.js")
+const { isLoggedIn, isOwner, validatelisting } = require("../middleware.js"); // ← import from middleware
 
 
 
-const validatelisting=(req,res,next)=>{
-    let {error} = listingschema.validate(req.body);
-    console.log(error);
-    if(error){
-        let errmsg = error.details.map((el)=>el.message).join(",");
-        throw new ExpressError(400,errmsg);
-    }else{
-        next();
-    }   
-};
+
 
 router.get("/", wrapasync( async (req,res)=>{
     // console.log("mongoose state:", mongoose.connection.readyState);
@@ -54,7 +45,7 @@ router.get("/:id",wrapasync( async (req,res)=>{
 })
 );
 //edit route
-router.get("/:id/edit",isLoggedIn,wrapasync(async (req,res)=>{
+router.get("/:id/edit",isLoggedIn,isOwner,wrapasync(async (req,res)=>{
     let {id} = req.params;
     const listing = await Listing.findById(id);
     if(!listing){
@@ -65,22 +56,17 @@ router.get("/:id/edit",isLoggedIn,wrapasync(async (req,res)=>{
 })
 );
 //update route
-router.put("/:id",isLoggedIn,validatelisting,wrapasync(async (req,res)=>{
-    let result = listingschema.validate(req.body);
-    console.log(result);
-    if(result.error){
-        throw new ExpressError(400,result.error);
-    }
+router.put("/:id",isLoggedIn,isOwner,validatelisting,wrapasync(async (req,res)=>{
     let {id} = req.params;
     await Listing.findByIdAndUpdate(id,{...req.body.listing});
     console.log(req.body.listing);
     req.flash("success","Updated successfully");
-    res.redirect("/listings");
+    res.redirect(`/listings/${id}`);
 })
 );
 
 //Delte route
-router.delete("/:id",isLoggedIn,wrapasync(async(req,res)=>{
+router.delete("/:id",isLoggedIn,isOwner,wrapasync(async(req,res)=>{
     let {id} = req.params;
     let deletedlisting = await Listing.findByIdAndDelete(id);
     req.flash("success","Deleted successfully");

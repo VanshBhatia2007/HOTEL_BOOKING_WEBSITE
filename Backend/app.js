@@ -66,16 +66,7 @@ main()
 
 
 
-const validatelisting=(req,res,next)=>{
-    let {error} = listingschema.validate(req.body);
-    console.log(error);
-    if(error){
-        let errmsg = error.details.map((el)=>el.message).join(",");
-        throw new ExpressError(400,errmsg);
-    }else{
-        next();
-    }   
-};
+
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
     res.locals.error= req.flash("error");
