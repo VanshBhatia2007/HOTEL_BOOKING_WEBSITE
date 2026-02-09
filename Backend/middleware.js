@@ -1,11 +1,14 @@
 // const Listing = require("./models/listing");
 const Listing = require("./models/listing.js");
+const Review = require("./models/review.js");
 const {listingschema , reviewschema} = require("./schema.js");
 const ExpressError=require("./utils/expresserror.js");
 module.exports.isLoggedIn = (req,res,next)=>{
     console.log(req.path, "..", req.originalUrl);
     if(!req.isAuthenticated()){
-        req.session.redirectUrl = req.originalUrl;
+        req.session.redirectUrl = req.method === "GET" 
+            ? req.originalUrl 
+            : req.headers.referer || "/listings";
         req.flash("error","you must be logged in to create a listing");
         return res.redirect("/login");
     }
@@ -50,3 +53,13 @@ module.exports.validatereview=(req,res,next)=>{
         next();
     }   
 };
+
+module.exports.isAuthor=async(req,res,next)=>{
+    let { id,reviewid} = req.params;
+    let review = await Review.findById(reviewid);
+    if(!review.author.equals(res.locals.curruser._id)){
+        req.flash("error","You dont have permission to delete this review");
+        return res.redirect(`/listings/${id}`);
+    }
+    next();
+}
