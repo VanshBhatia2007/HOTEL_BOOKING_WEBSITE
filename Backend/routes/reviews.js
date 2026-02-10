@@ -6,29 +6,12 @@ const ExpressError=require("../utils/expresserror.js");
 const wrapasync=require("../utils/wrapasync.js");
 const Listing = require("../models/listing.js");
 const { isLoggedIn, validatereview, isAuthor } = require("../middleware.js");
+const { createreview, deletereview } = require("../controllers/reviews.js");
 
 
 //review route
-router.post("/",isLoggedIn,validatereview,wrapasync(async(req,res)=>{
-
-    let listing = await Listing.findById(req.params.id);
-    let newreview = new Review(req.body.review);
-    newreview.author = req.user._id;
-    listing.reviews.push(newreview);
-    await newreview.save();
-    await listing.save();
-    req.flash("success","new Review added");
-    res.redirect(`/listings/${listing.id}`);
-})
-);
+router.post("/",isLoggedIn,validatereview,wrapasync(createreview));
 //Delete review route
-router.delete("/:reviewid",isLoggedIn,isAuthor,wrapasync(async(req,res)=>{
-    let {id , reviewid} = req.params;
-    await Listing.findByIdAndUpdate(id,{$pull:{reviews: reviewid}});
-    await Review.findByIdAndDelete(reviewid);
-    req.flash("success","Review deleted successfully");
-    res.redirect(`/listings/${id}`);
-})
-);
+router.delete("/:reviewid",isLoggedIn,isAuthor,wrapasync(deletereview));
 
 module.exports=router;
