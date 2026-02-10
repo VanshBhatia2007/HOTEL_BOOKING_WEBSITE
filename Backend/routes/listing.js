@@ -11,25 +11,24 @@ const { isLoggedIn, isOwner, validatelisting } = require("../middleware.js"); //
 const { index, newroute, newroutepost, showroute, editroute, updateroute, deleteroute } = require("../controllers/listing.js");
 
 
+router.route("/")
+.get(wrapasync(index))
+.post(isLoggedIn,validatelisting, wrapasync(newroutepost));
 
-
-
-router.get("/", wrapasync(index));
 //new route
 router.get("/new",isLoggedIn,newroute);
 
-router.post("/",isLoggedIn,validatelisting, wrapasync(newroutepost));
-
-//specific route
-router.get("/:id",wrapasync(showroute));
-
+router.route("/:id")
+.get(wrapasync(showroute))
+.put(isLoggedIn,isOwner,validatelisting,wrapasync(updateroute))
+.delete(isLoggedIn,isOwner,wrapasync(deleteroute));
 //edit route
 router.get("/:id/edit",isLoggedIn,isOwner,wrapasync(editroute));
 //update route
-router.put("/:id",isLoggedIn,isOwner,validatelisting,wrapasync(updateroute));
+
 
 //Delte route
-router.delete("/:id",isLoggedIn,isOwner,wrapasync(deleteroute));
+
 
 
 module.exports = router;
