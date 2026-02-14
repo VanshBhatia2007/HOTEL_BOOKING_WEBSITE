@@ -6,24 +6,30 @@
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#navbarNavAltMarkup"
-    
     >
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-link"  href="/listings">Home</a>
+        <a class="nav-link" href="/listings">Home</a>
         <a class="nav-link" href="/listings">All Listing</a>
-        
       </div>
+
+      <div class="navbar-nav mx-auto">
+        <form class="d-flex align-items-center gap-2">
+          <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-danger" type="submit">Search</button>
+        </form>
+      </div>
+
       <div class="navbar-nav ms-auto">
         <a class="nav-link" href="/listings/new">Add new Listing</a>
         <% if(!curruser){ %>
-              <a class="nav-link"  href="/signup"><b>Sign up</b></a>
-              <a class="nav-link" href="/login"><b>Log in</b></a>
+          <a class="nav-link" href="/signup"><b>Sign up</b></a>
+          <a class="nav-link" href="/login"><b>Log in</b></a>
         <% } %>
         <% if(curruser){ %>
-            <a class="nav-link" href="/logout"><b>Log out</b></a>
+          <a class="nav-link" href="/logout"><b>Log out</b></a>
         <% } %>
       </div>
     </div>
